@@ -4,6 +4,11 @@
 
 ;; See README on how to use
 
+(global-set-key (kbd "\C-c \C-c") 'eval-defun)
+
+(if (not (fboundp 'package-desc-vers))
+    (defalias 'package-desc-vers 'package--ac-desc-version))
+
 (defun bootstrap-melpa ()
   (let* ((my-path (or load-file-name
 		      (buffer-file-name)))
@@ -11,15 +16,6 @@
     (unless (require 'package nil t)
       (grail-install-elpa))
     (save-excursion
-      (switch-to-buffer (loop for file in '("package-filter.el"
-                                            "package-filter.el.txt")
-                              for path = (expand-file-name file my-dir)
-                              if (file-exists-p path)
-                              return (find-file path)
-                              finally return
-                              (url-retrieve-synchronously
-                               "https://raw.github.com/milkypostman/package-filter/master/package-filter.el")))
-      (package-install-from-buffer (package-buffer-info) 'single)
       (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
       (when (< emacs-major-version 24)
 	(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))))))
@@ -31,9 +27,9 @@
 (defun bootstrap-packages ()
   ;; Need to force it
   (require 'cask)
+  (require 'pallet)
   (load-library "pallet-overrides")
-  (pt/cask-up)
-  (cask-install))
+  (pallet-install))
 
 (defun bootstrap-finish ()
   (display-about-screen)
